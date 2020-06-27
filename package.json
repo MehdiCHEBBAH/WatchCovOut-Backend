@@ -1,0 +1,30 @@
+{
+  "name": "watchcovout",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MehdiCHEBBAH/WatchCovOut-Backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MehdiCHEBBAH/WatchCovOut-Backend/issues"
+  },
+  "homepage": "https://github.com/MehdiCHEBBAH/WatchCovOut-Backend#readme",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-bearer-token": "^2.4.0",
+    "firebase-admin": "^8.12.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
