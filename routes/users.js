@@ -8,7 +8,7 @@ const e = require('express');
 
 const router = express.Router();
 admin.initializeApp({
-    credential: admin.credential.cert(require(config.FIREBASE_CREDENTIALS)),
+    credential: admin.credential.cert(require(`../${config.FIREBASE_CREDENTIALS}`)),
     databaseURL: config.DATABASE_URL
 });
 
@@ -16,27 +16,29 @@ admin.initializeApp({
 const db = admin.firestore();
 
 /************* Routes ************* */
-router.put('/:uid',async (req, res) => {
-    let snapshot = await db.collection('users').where('id', '==', req.body.nid).get();
-    if(!snapshot.empty){
-        admin.auth().deleteUser(req.params.uid)
-        .then(function() {
-            res.status(500);
-            res.response({error: 'This NID already exists'});
-        })
-        .catch(function(error) {
-            res.status(500);
-            res.send({error: error});
-        });
-    }else{
-        admin.auth().setCustomUserClaims(req.params.uid, queryObj2rolesObj(req.query)).then(() => {});
-        await db.collection('users').doc(req.body.nid).set({
-            isConfirmedCase: false,
-            nationalCardPicURL: req.body.nationalCardPicURL,
-            uid: req.params.uid
-        });
-    }
-});
+    router.put('/:uid',async (req, res) => {
+        let snapshot = await db.collection('users').where('id', '==', req.body.nid).get();
+        if(!snapshot.empty){
+            admin.auth().deleteUser(req.params.uid)
+            .then(function() {
+                res.status(500);
+                res.response({error: 'This NID already exists'});
+            })
+            .catch(function(error) {
+                res.status(500);
+                res.send({error: error});
+            });
+        }else{
+            admin.auth().setCustomUserClaims(req.params.uid, queryObj2rolesObj(req.query)).then(() => {});
+            await db.collection('users').doc(req.body.nid).set({
+                isConfirmedCase: false,
+                nationalCardPicURL: req.body.nationalCardPicURL,
+                uid: req.params.uid
+            });
+            res.status(200);
+            res.send({message: 'User Created seccefully'});
+        }
+    });
 
 
 /********************************** */
