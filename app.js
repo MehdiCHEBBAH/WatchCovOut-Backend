@@ -1,6 +1,5 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-var admin = require("firebase-admin");
 const axios = require('axios');
 const cors = require('cors');
 const bearerToken = require('express-bearer-token');
@@ -11,11 +10,6 @@ var config = require("./config.json");
 /**************** Inits ****************** */
     const app = express();
 
-    admin.initializeApp({
-        credential: admin.credential.cert(require(config.FIREBASE_CREDENTIALS)),
-        databaseURL: config.DATABASE_URL
-    });
-
 
 /*********** Middelwares ********* */
     app.use(cors());
@@ -24,11 +18,10 @@ var config = require("./config.json");
 
 
 /*********** GLOBAL VARS ********* */
-
+    const usersRoutes = require('./routes/users');
 
 /* *********** routes ************ */
-
-
+    app.use('/api/v0/users', usersRoutes);
 
 
 
