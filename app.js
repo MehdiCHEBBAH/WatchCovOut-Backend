@@ -3,12 +3,18 @@ const bodyParser = require('body-parser');
 const axios = require('axios');
 const cors = require('cors');
 const bearerToken = require('express-bearer-token');
+var admin = require("firebase-admin");
 
 var config = require("./config.json");
 
-
 /**************** Inits ****************** */
     const app = express();
+
+    admin.initializeApp({
+        credential: admin.credential.cert(require(config.FIREBASE_CREDENTIALS)),
+        databaseURL: config.DATABASE_URL
+    });
+    exports.admin = admin;
 
 
 /*********** Middelwares ********* */
@@ -19,12 +25,15 @@ var config = require("./config.json");
 
 /*********** GLOBAL VARS ********* */
     const usersRoutes = require('./routes/users');
+    const placesRoutes = require('./routes/places');
     const visitsRoutes = require('./routes/visits');
-
 
 /* *********** routes ************ */
     app.use('/api/v0/users', usersRoutes);
+    app.use('/api/v0/places', placesRoutes);
     app.use('/api/v0/visits', visitsRoutes);
+
+
 
 
 
