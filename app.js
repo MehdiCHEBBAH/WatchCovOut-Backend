@@ -19,11 +19,11 @@ var config = require("./config.json");
 
 /*********** GLOBAL VARS ********* */
     const usersRoutes = require('./routes/users');
+    const visitsRoutes = require('./routes/visits');
 
 /* *********** routes ************ */
     app.use('/api/v0/users', usersRoutes);
-
-
+    app.use('/api/v0/visits', visitsRoutes);
 
 
 
