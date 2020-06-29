@@ -7,10 +7,11 @@ const { query } = require('express');
 
 
 const router = express.Router();
+
 admin.initializeApp({
     credential: admin.credential.cert(require(config.FIREBASE_CREDENTIALS)),
     databaseURL: config.DATABASE_URL
-});
+},'visits');
 
 /************** Global Vars ************/
 const db = admin.firestore();
@@ -60,10 +61,6 @@ router.get("/:locationId" , async(req ,res)=>{
     let {placeId} = req.params
 
 })
-
-/:creneauId/allusers
-
-
 
 
 module.exports = router;

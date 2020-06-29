@@ -21,6 +21,7 @@ var config = require("./config.json");
     const usersRoutes = require('./routes/users');
     const visitsRoutes = require('./routes/visits');
 
+
 /* *********** routes ************ */
     app.use('/api/v0/users', usersRoutes);
     app.use('/api/v0/visits', visitsRoutes);
@@ -31,3 +32,4 @@ var config = require("./config.json");
 app.listen( 3000, ()=>{
     console.log('started on port 3000');
 });
+
