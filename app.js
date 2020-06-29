@@ -3,12 +3,18 @@ const bodyParser = require('body-parser');
 const axios = require('axios');
 const cors = require('cors');
 const bearerToken = require('express-bearer-token');
+var admin = require("firebase-admin");
 
 var config = require("./config.json");
 
-
 /**************** Inits ****************** */
     const app = express();
+
+    admin.initializeApp({
+        credential: admin.credential.cert(require(config.FIREBASE_CREDENTIALS)),
+        databaseURL: config.DATABASE_URL
+    });
+    exports.admin = admin;
 
 
 /*********** Middelwares ********* */

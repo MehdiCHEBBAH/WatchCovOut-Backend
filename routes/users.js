@@ -1,16 +1,12 @@
 const express = require('express');
 const axios = require('axios');
-var admin = require("firebase-admin");
 
 var config = require("../config.json");
-const e = require('express');
+var {admin} = require('../app');
 
 
 const router = express.Router();
-admin.initializeApp({
-    credential: admin.credential.cert(require(`../${config.FIREBASE_CREDENTIALS}`)),
-    databaseURL: config.DATABASE_URL
-});
+
 
 /************** Global Vars ************/
 const db = admin.firestore();
@@ -24,11 +20,11 @@ const db = admin.firestore();
                 admin.auth().deleteUser(req.params.uid)
                 .then(function() {
                     res.status(500);
-                    res.response({error: `This NID already exists, We deleted this user: ${req.params.uid}`});
+                    res.send({error: `This NID already exists, We deleted this user: ${req.params.uid}`});
                 })
                 .catch(function(error) {
                     res.status(500);
-                    res.response({error: `This NID already exists, We deleted this user: ${req.params.uid}`});
+                    res.send({error: `This NID already exists, We deleted this user: ${req.params.uid}`});
                 });
             }else {
                 admin.auth().setCustomUserClaims(req.params.uid, queryObj2rolesObj(req.query)).then(() => {}).catch(err=>{});

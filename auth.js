@@ -1,13 +1,7 @@
 const axios = require('axios');
-var admin = require("firebase-admin");
 
 var config = require("./config.json");
 
-
-admin.initializeApp({
-    credential: admin.credential.cert(require(config.FIREBASE_CREDENTIALS)),
-    databaseURL: config.DATABASE_URL
-});
 
 
 
