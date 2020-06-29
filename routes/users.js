@@ -1,7 +1,5 @@
 const express = require('express');
-const axios = require('axios');
 
-var config = require("../config.json");
 var {admin} = require('../app');
 
 
