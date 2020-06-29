@@ -25,9 +25,11 @@ var config = require("./config.json");
 
 /*********** GLOBAL VARS ********* */
     const usersRoutes = require('./routes/users');
+    const placesRoutes = require('./routes/places');
 
 /* *********** routes ************ */
     app.use('/api/v0/users', usersRoutes);
+    app.use('/api/v0/places', placesRoutes);
 
 
 

@@ -27,7 +27,12 @@ const db = admin.firestore();
                     res.send({error: `This NID already exists, We deleted this user: ${req.params.uid}`});
                 });
             }else {
-                admin.auth().setCustomUserClaims(req.params.uid, queryObj2rolesObj(req.query)).then(() => {}).catch(err=>{});
+                admin.auth().setCustomUserClaims(req.params.uid, {
+                    nid: req.body.nid,
+                    roles: queryObj2rolesObj(req.query)
+                })
+                .then(() => {})
+                .catch(err=>{});
                 await db.collection('users').doc(req.body.nid).set({
                     isConfirmedCase: false,
                     nationalCardPicURL: req.body.nationalCardPicURL,

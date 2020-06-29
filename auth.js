@@ -4,7 +4,6 @@ var config = require("./config.json");
 
 
 
-
 const decodeToken = async (token) => {
     var result = {};
     try{
@@ -54,19 +53,6 @@ module.exports = {
     isAdmin : async (req, res, next)=>{
         let isAuth = await decodeToken(req.token);
         if(!(isAuth.auth && isAuth.roles['ADMIN'])){
-            res.status(401);
-            res.send({
-                error:'Unauthorized',
-                details: isAuth.err
-            });
-        }else{
-            next();
-        }
-    },
-
-    isMe : async (req, res, next)=>{
-        let isAuth = await decodeToken(req.token);
-        if(!(isAuth.auth && isAuth.uid === req.query.uid)){
             res.status(401);
             res.send({
                 error:'Unauthorized',
