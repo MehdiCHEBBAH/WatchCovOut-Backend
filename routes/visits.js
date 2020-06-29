@@ -21,12 +21,18 @@ const db = admin.firestore();
 // get best visits for a place in a given date
 router.get("/best", async(req,res)=>{
     let locationId = req.query.locationId
+    console.log("location is ===>"+locationId)
     let date = req.query.date
 
-    let visitsSnapshot = await db.collection('places').where('id', '==', locationId).get();
-    visitsSnapshot.forEach(element => {
-        console.log("element===>" +element)
-    });
+    let visitsSnapshot = await db.collection('places').doc( locationId).get();
+    console.log("done")
+    // visitsSnapshot.forEach(element => {
+    //     console.log("element===>" +element)
+    // });
+
+    res.status(200).send(visitsSnapshot.data())
+
+
 
 })
 
