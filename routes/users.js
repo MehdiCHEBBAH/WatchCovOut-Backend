@@ -17,27 +17,29 @@ const db = admin.firestore();
 
 /************* Routes ************* */
     router.put('/:uid',async (req, res) => {
-        db.collection('users').doc(req.body.nid).get()
-        .then(async (snapshot)=>{
-            admin.auth().setCustomUserClaims(req.params.uid, queryObj2rolesObj(req.query)).then(() => {});
-            await db.collection('users').doc(req.body.nid).set({
-                isConfirmedCase: false,
-                nationalCardPicURL: req.body.nationalCardPicURL,
-                uid: req.params.uid
-            });
-            res.status(200);
-            res.send({message: 'User Created seccefully'});
-        })
-        .catch(async (err)=>{
-            admin.auth().deleteUser(req.params.uid)
-            .then(function() {
-                res.status(500);
-                res.response({error: 'This NID already exists, We deleted this user.'});
-            })
-            .catch(function(error) {
-                res.status(500);
-                res.send({error: error});
-            });
+        const usersRef = db.collection('users').doc(req.body.nid);
+        usersRef.get()
+        .then(async (snapshot) => {
+            if (snapshot.exists) {
+                admin.auth().deleteUser(req.params.uid)
+                .then(function() {
+                    res.status(500);
+                    res.response({error: `This NID already exists, We deleted this user: ${req.params.uid}`});
+                })
+                .catch(function(error) {
+                    res.status(500);
+                    res.response({error: `This NID already exists, We deleted this user: ${req.params.uid}`});
+                });
+            }else {
+                admin.auth().setCustomUserClaims(req.params.uid, queryObj2rolesObj(req.query)).then(() => {}).catch(err=>{});
+                await db.collection('users').doc(req.body.nid).set({
+                    isConfirmedCase: false,
+                    nationalCardPicURL: req.body.nationalCardPicURL,
+                    uid: req.params.uid
+                });
+                res.status(200);
+                res.send({message: 'User Created seccefully'});
+            }
         });
     });
 
