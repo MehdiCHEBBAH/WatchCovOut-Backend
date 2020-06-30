@@ -1,19 +1,12 @@
 const express = require("express");
 const axios = require("axios");
-var admin = require("firebase-admin");
 var config = require("../config.json");
 const e = require("express");
 const { query } = require("express");
 
 const router = express.Router();
 
-admin.initializeApp(
-  {
-    credential: admin.credential.cert(require(config.FIREBASE_CREDENTIALS)),
-    databaseURL: config.DATABASE_URL,
-  },
-  "visits"
-);
+var {admin} = require('../app');
 
 /************** Global Vars ************/
 const db = admin.firestore();
