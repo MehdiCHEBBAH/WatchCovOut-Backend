@@ -27,31 +27,34 @@ router.get("/best", async (req, res) => {
   console.log("location is ===>" + locationId + date);
 
   let result = [];
-    db.collection("places")
+  db.collection("places")
     .doc(locationId)
     .collection("visits")
-    .doc("date", "==", date)
+    .doc(date)
     .collection("time")
     .get()
     .then(async (timesSnapshot) => {
-      console.log("snapm   " + JSON.stringify(timesSnapshot, null, 2));
-      timesSnapshot.forEach(async (doc) => {
-        console.log(doc.id, "=>", doc.data());
-        let timeId = doc.id;
-        let numberOfVisitors = doc.data().numberOfVisitors;
-        let time = doc.data().time;
+      if (!timesSnapshot.empty) {
+        timesSnapshot.forEach(async (doc) => {
+          let timeId = doc.id;
+          let numberOfVisitors = doc.data().numberOfVisitors;
+          let time = doc.data().time;
 
-        result.push({
-          timeId,
-          numberOfVisitors,
-          time,
+          result.push({
+            timeId,
+            numberOfVisitors,
+            time,
+          });
         });
-      });
-
-      res.status(200).send(result);
+        // sort the result
+        result.sort(function (a, b) {
+          return a.numberOfVisitors > b.numberOfVisitors ? 1 : -1;
+        });
+        res.status(200).send(result);
+      } else {
+        res.status(400).send({ error: "no data found" });
+      }
     });
-  //  where('id', '>=', date).where('id', '<=', date + '~').get();
-  console.log("done");
 });
 
 // get all visits per single user
@@ -69,9 +72,7 @@ router.get("/user/:userId", async (req, res) => {
       error: "Bad Request , userId does not exist",
     });
   }
-
   let result = [];
-
   snapshot.forEach(async (doc) => {
     console.log(doc.id, "=>", doc.data());
     let items = doc.id.split("|");
@@ -102,20 +103,103 @@ router.get("/user/:userId", async (req, res) => {
 router.get("/:placeId/allusers", async (req, res) => {
   let { placeId } = req.params;
   let date = req.query.date;
+  let time = req.query.time;
   // TODO : build the comparison timestamp :compDate
   let compDate;
 
-  let snapshot = await db
-    .collection("places")
-    .where("id", "==", placeId)
-    .collection("visits")
-    .where("id", "==", compDate)
-    .get();
+  let result = [];
+  try {
+    console.log("flutter");
+    let snapshot = await db
+      .collection("places")
+      .doc(placeId)
+      .collection("visits")
+      .doc(date)
+      .collection("time")
+      .doc(time)
+      .collection("people")
+      .get()
+      .then(async (snapshot) => {
+        //console.log(snapshot.data());
+        console.log("done");
+        if (!snapshot.empty) {
+          // await Promise.all(snapshot.map(async (doc) => {
+          //   let userId = doc.id;
+          //   console.log("user id is ==>"+ userId)
+          //   //get the user data
+          //    let user = await db.collection('users').doc(userId).get().then(async user =>{
+          //     let myData = user.data();
+          //     console.log(myData)
+          //     result.push({
+          //       userId,
+          //       myData,
+          //     });
+          //   })
+          //   c
+          // }));
+          snapshot.forEach(async (doc) => {
+            let userId = doc.id;
+            console.log("user id is ==>" + userId);
+            let myData = doc.data();
+            console.log(myData);
+            result.push({
+              userId,
+              myData,
+            });
+
+            // todo: could not wait for data in forEach loop , fix this later
+            //get the user data
+            //  let user = await db.collection('users').doc(userId).get().then(async user =>{
+            //   let myData = user.data();
+            //   console.log(myData)
+            //   result.push({
+            //     userId,
+            //     myData,
+            //   });
+            // })
+          });
+
+          res.status(200).send(result);
+        } else {
+          res.status(404).send({ error: "no data found" });
+        }
+      });
+  } catch (error) {
+    return res.status(500).send({ error: "Internal server Error" });
+  }
 });
 
-// get all visits for a place
-router.get("/:locationId", async (req, res) => {
+// choose a time and date for visiting
+router.post("/choose/:placeId", async (req, res) => {
+  console.log("choose");
   let { placeId } = req.params;
+  let date = req.query.date;
+  let time = req.query.time;
+  let userId = req.body.userId;
+
+  console.log("userId ==>" + userId);
+
+  try {
+    let visitRef = db
+      .collection("places")
+      .doc(placeId)
+      .collection("visits")
+      .doc(date)
+      .collection("time")
+      .doc(time)
+      .collection("people")
+      .doc(userId);
+    let result1 = await visitRef.set({});
+
+    let userRef = db.collection("users").doc(userId).collection('visits').doc(date+"T"+time+'|'+ placeId);
+    let result2 = await userRef.set({});
+    return res
+      .status(201)
+      .send({ message: "visit choosen with seccess", result: {result1, result2} });
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send({ error: "Internal server Error"+ error });
+  }
 });
 
 module.exports = router;
