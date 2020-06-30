@@ -3,7 +3,6 @@ const express = require('express');
 
 var config = require("../config.json");
 
-const e = require('express');
 const router = express.Router();
 
 

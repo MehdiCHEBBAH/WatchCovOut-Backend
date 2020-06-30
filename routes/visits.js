@@ -1,19 +1,9 @@
 const express = require("express");
-const axios = require("axios");
-var admin = require("firebase-admin");
 var config = require("../config.json");
-const e = require("express");
-const { query } = require("express");
 
 const router = express.Router();
 
-admin.initializeApp(
-  {
-    credential: admin.credential.cert(require(config.FIREBASE_CREDENTIALS)),
-    databaseURL: config.DATABASE_URL,
-  },
-  "visits"
-);
+var {admin} = require('../app');
 
 /************** Global Vars ************/
 const db = admin.firestore();
@@ -22,38 +12,29 @@ const db = admin.firestore();
 
 // get best visits for a place in a given date
 router.get("/best", async (req, res) => {
-  let locationId = req.query.locationId;
+  let locationId = req.query.placeId;
   let date = req.query.date;
-  console.log("location is ===>" + locationId + date);
 
-  let result = [];
+  var result = [];
   db.collection("places")
     .doc(locationId)
     .collection("visits")
     .doc(date)
-    .collection("time")
+    .collection("times")
+    .orderBy('numberOfVisitors', 'desc')
     .get()
-    .then(async (timesSnapshot) => {
-      if (!timesSnapshot.empty) {
-        timesSnapshot.forEach(async (doc) => {
-          let timeId = doc.id;
+    .then( timesSnapshot => {
+        timesSnapshot.forEach( doc => {
+          let time = doc.id;
           let numberOfVisitors = doc.data().numberOfVisitors;
-          let time = doc.data().time;
 
           result.push({
-            timeId,
-            numberOfVisitors,
             time,
+            numberOfVisitors
           });
         });
-        // sort the result
-        result.sort(function (a, b) {
-          return a.numberOfVisitors > b.numberOfVisitors ? 1 : -1;
-        });
+    
         res.status(200).send(result);
-      } else {
-        res.status(400).send({ error: "no data found" });
-      }
     });
 });
 
@@ -97,76 +78,6 @@ router.get("/user/:userId", async (req, res) => {
         res.status(200).send(result);
       });
   });
-});
-
-// get all users of a specific visit
-router.get("/:placeId/allusers", async (req, res) => {
-  let { placeId } = req.params;
-  let date = req.query.date;
-  let time = req.query.time;
-  // TODO : build the comparison timestamp :compDate
-  let compDate;
-
-  let result = [];
-  try {
-    console.log("flutter");
-    let snapshot = await db
-      .collection("places")
-      .doc(placeId)
-      .collection("visits")
-      .doc(date)
-      .collection("time")
-      .doc(time)
-      .collection("people")
-      .get()
-      .then(async (snapshot) => {
-        //console.log(snapshot.data());
-        console.log("done");
-        if (!snapshot.empty) {
-          // await Promise.all(snapshot.map(async (doc) => {
-          //   let userId = doc.id;
-          //   console.log("user id is ==>"+ userId)
-          //   //get the user data
-          //    let user = await db.collection('users').doc(userId).get().then(async user =>{
-          //     let myData = user.data();
-          //     console.log(myData)
-          //     result.push({
-          //       userId,
-          //       myData,
-          //     });
-          //   })
-          //   c
-          // }));
-          snapshot.forEach(async (doc) => {
-            let userId = doc.id;
-            console.log("user id is ==>" + userId);
-            let myData = doc.data();
-            console.log(myData);
-            result.push({
-              userId,
-              myData,
-            });
-
-            // todo: could not wait for data in forEach loop , fix this later
-            //get the user data
-            //  let user = await db.collection('users').doc(userId).get().then(async user =>{
-            //   let myData = user.data();
-            //   console.log(myData)
-            //   result.push({
-            //     userId,
-            //     myData,
-            //   });
-            // })
-          });
-
-          res.status(200).send(result);
-        } else {
-          res.status(404).send({ error: "no data found" });
-        }
-      });
-  } catch (error) {
-    return res.status(500).send({ error: "Internal server Error" });
-  }
 });
 
 // choose a time and date for visiting
