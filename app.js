@@ -34,8 +34,11 @@ var config = require("./config.json");
     app.use('/api/v0/places', placesRoutes);
     app.use('/api/v0/visits', visitsRoutes);
 
-
-
+    
+    app.get("/", (req, res) => {
+        res.status(200).send("/api/v0/");
+      });
+    
 
 // start the app
 app.listen( 3000, ()=>{
