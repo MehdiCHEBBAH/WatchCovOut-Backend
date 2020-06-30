@@ -39,7 +39,7 @@ var config = require("./config.json");
     
 
 // start the app
-app.listen( 8081, ()=>{
+app.listen( process.env.PORT ||8081, ()=>{
     console.log('started on port 3000');
 });
 
