@@ -1,6 +1,5 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const axios = require('axios');
 const cors = require('cors');
 const bearerToken = require('express-bearer-token');
 var admin = require("firebase-admin");
@@ -25,22 +24,15 @@ var config = require("./config.json");
 
 /*********** GLOBAL VARS ********* */
     const usersRoutes = require('./routes/users');
-<<<<<<< HEAD
+
     const visitsRoutes = require('./routes/visits');
 
-
+    const placesRoutes = require('./routes/places');
 /* *********** routes ************ */
     app.use('/api/v0/users', usersRoutes);
     app.use('/api/v0/visits', visitsRoutes);
-=======
-    const placesRoutes = require('./routes/places');
-
-/* *********** routes ************ */
-    app.use('/api/v0/users', usersRoutes);
     app.use('/api/v0/places', placesRoutes);
 
-
->>>>>>> bc7b22f0405348ed325625325c782a4ceb15a763
 
 
 

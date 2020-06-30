@@ -1,8 +1,4 @@
-const axios = require('axios');
-
-var config = require("./config.json");
-
-
+var {admin} = require('./app');
 
 const decodeToken = async (token) => {
     var result = {};

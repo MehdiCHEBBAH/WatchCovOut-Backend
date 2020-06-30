@@ -1,28 +1,40 @@
 const express = require('express');
-const axios = require('axios');
+
 
 var config = require("../config.json");
-<<<<<<< HEAD
+
 const e = require('express');
 const router = express.Router();
 
 
-admin.initializeApp({
-    credential: admin.credential.cert(require(config.FIREBASE_CREDENTIALS)),
-    databaseURL: config.DATABASE_URL
-});
-=======
 var {admin} = require('../app');
+const { isAdmin, isUser } = require('../auth');
 
 
-const router = express.Router();
-
->>>>>>> bc7b22f0405348ed325625325c782a4ceb15a763
 
 /************** Global Vars ************/
 const db = admin.firestore();
 
 /************* Routes ************* */
+
+    /**
+     * Get all users
+     */
+    router.get('/', /*isAdmin,*/ async(req, res)=>{
+        var data = await db.collection('users').get()
+        var response = [];
+        data.forEach(doc=>{
+            let e = doc.data();
+            e.nid = doc.id;
+            response.push(e);
+        })
+        res.status(200);
+        res.send(response);
+    });
+
+    /**
+     * Create a user
+     */
     router.put('/:uid',async (req, res) => {
         const usersRef = db.collection('users').doc(req.body.nid);
         usersRef.get()
@@ -55,7 +67,88 @@ const db = admin.firestore();
         });
     });
 
+    /**
+     * make the person confirmed case
+     */
+    router.post('/:nid', /*isUser,*/ async (req, res)=>{
+        try{
+            await db.collection('users').doc(req.params.nid).update({isConfirmedCase: req.query.isConfirmedCase});
+            res.status(200);
+            res.send({message: 'Updated seccessfuly'});
+        }catch(err){
+            res.status(500);
+            res.send({error: err});
+        }
+    });
 
+    /**
+     * get people meeted a person in specific days
+     */
+    router.get('/:nid/meets', /*isAdmin,*/ async (req, res)=>{
+        var dates = req.query.dates.split(',');
+        var visits = await db.collection('users').doc(req.params.nid).collection('visits').get();
+        var results = [];
+        visits.forEach(doc=>{
+            if(dates.includes(doc.id.split('T')[0])){
+                results.push(doc.id);
+            }
+        });
+        var people = {};
+        for(let e of results){
+            let place = e.split('|')[1];
+            let day = e.split('T')[0];
+            let time = e.split('T')[1].split('|')[0];
+
+            let data = await db.collection('places')
+                                .doc(place)
+                                .collection('visits')
+                                .doc(day)
+                                .collection('times')
+                                .doc(time)
+                                .collection('people')
+                                .get();
+            data.forEach(doc=>{
+                if(!(doc.id === req.params.nid)){
+                    people[doc.id] = (typeof people[doc.id] === 'undefined') ? 1 : people[doc.id] + 1;
+                }
+            });
+        }
+        res.send(people);
+    });
+
+    /**
+     * Add a notification to user
+     */
+    router.put('/:nid/notifications', /*isUser,*/ async (req, res)=>{
+        try{
+            await db.collection('users').doc(req.params.nid).collection('notifications').add(req.body);
+            res.status(200);
+            res.send({message: 'Added notification'});
+        }catch(err){
+            res.status(500);
+            res.send({error: err});
+        }
+    });
+
+    /**
+     * Get all notifications
+     */
+    router.get('/:nid/notifications', /*isUser,*/ async (req, res)=>{
+        try{
+            var data = await db.collection('users').doc(req.params.nid).collection('notifications').get();
+            var response = [];
+            data.forEach(doc=>{
+                let e = doc.data();
+                e.id = doc.id;
+                response.push(e);
+            })
+            res.status(200);
+            res.send(response);
+        }catch(err){
+            res.status(500);
+            res.send({error: err});
+        }
+    });
 /********************************** */
 const queryObj2rolesObj = (query)=>{
     let roles = {
