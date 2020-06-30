@@ -16,12 +16,37 @@ const db = admin.firestore();
      * Add a place
      */
     router.put('/', /*isServiceProvider,*/ async (req, res) => {
-        const result = await db.collection('places').add(req.body);
-        res.status(200);
-        res.send({
-            msg: 'Data added seccesfuly',
-            id: result.id
-        })
+        try{
+            const result = await db.collection('places').add(req.body);
+            var i;
+            var now = new Date();
+            for(i = 0; i<=30 ; i++){
+                await db
+                    .collection('places').doc(result.id)
+                    .collection('visits').doc(date.format(now, 'YYYY-MM-DD'))
+                    .set({});
+                var placeDateRef= db.collection('places').doc(result.id)
+                                    .collection('visits').doc(date.format(now, 'YYYY-MM-DD'))
+                                    .collection('times');
+                var openingTime = new Date(2020, 01, 01, 8, 00); // TODO change this to opening time
+                var closingTime = new Date(2020, 01, 01, 17, 00); // TODO change this to closing time
+                var time = openingTime;
+                while(date.subtract(closingTime, time).toMinutes() >= 0){
+                    await placeDateRef.doc(date.format(time, 'HH:mm')).set({numberOfVisitors: 0});
+                    time = date.addMinutes(time, 30); //TODO change this to chunks of time
+                }
+                now = date.addDays(now, 1);
+            }
+    
+            res.status(200);
+            res.send({
+                msg: 'Data added seccesfuly',
+                id: result.id
+            })
+        }catch(err){
+            res.status(500);
+            res.send({error: err});
+        }
     });
 
     /**
@@ -45,32 +70,6 @@ const db = admin.firestore();
             res.status(500);
             res.send(err);
         });
-    });
-
-    /**
-     * Create a date in a place
-     */
-    router.post('/:place_id/date', /*isServiceProvider,*/ async (req, res)=>{
-        try{
-            await db.collection('places').doc(req.params.place_id).collection('visits').doc(req.query.date).set({date: req.query.date});
-            var placeDateRef = db.collection('places').doc(req.params.place_id).collection('visits').doc(req.query.date).collection('times');
-            var openingTime = new Date(2020, 01, 01, 8, 00); // TODO change this to opening time
-            var closingTime = new Date(2020, 01, 01, 17, 00); // TODO change this to closing time
-            var time = openingTime;
-            console.log(time);
-            while(date.subtract(closingTime, time).toMinutes() >= 0){
-                await placeDateRef.doc(date.format(time, 'HH:mm')).set({
-                    numberOfVisitors: 0,
-                    time: date.format(time, 'HH:mm')
-                });
-                time = date.addMinutes(time, 30); //TODO change this to chunks of time
-            }
-            res.status(200);
-            res.send({msg: 'date created seccessfuly'});
-        }catch(err){
-            res.status(500);
-            res.send({error: err});
-        }
     });
 
     /**
