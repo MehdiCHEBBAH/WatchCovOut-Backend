@@ -32,16 +32,12 @@ const db = admin.firestore();
         .then(data=>{
             var response = [];
             data.forEach(doc=>{
-                response.push({
-                    id: doc.id,
-                    location: {
-                        latitude: doc._fieldsProto.location.mapValue.fields.latitude.doubleValue,
-                        longitude: doc._fieldsProto.location.mapValue.fields.longitude.doubleValue,
-                    },
-                    numberOfPlaces: doc._fieldsProto.numberOfPlaces.integerValue,
-                    type: doc._fieldsProto.type.stringValue,
-                    title: doc._fieldsProto.title.stringValue
-                });
+                let data = doc.data();
+                
+                delete data.chunksOfTime;
+                data.id = doc.id;
+
+                response.push(data);
             })
             res.send(response);
         })
@@ -61,8 +57,9 @@ const db = admin.firestore();
             var openingTime = new Date(2020, 01, 01, 8, 00); // TODO change this to opening time
             var closingTime = new Date(2020, 01, 01, 17, 00); // TODO change this to closing time
             var time = openingTime;
-            while(date.subtract(time, closingTime).toMinutes() >= 0){
-                await placeDateRef.doc(date.format(time, 'HH:mm')).update({
+            console.log(time);
+            while(date.subtract(closingTime, time).toMinutes() >= 0){
+                await placeDateRef.doc(date.format(time, 'HH:mm')).set({
                     numberOfVisitors: 0,
                     time: date.format(time, 'HH:mm')
                 });
@@ -79,7 +76,7 @@ const db = admin.firestore();
     /**
      * Add a person to place
      */
-    router.put('/:place_id/person', /*isUser,*/ async (req, res)=>{
+    router.put('/:place_id/users', /*isUser,*/ async (req, res)=>{
         try{
             var placeDateTimeRef = db.collection('places').doc(req.params.place_id).collection('visits').doc(req.body.date).collection('times').doc(req.body.time);
             await placeDateTimeRef.collection('people').doc(req.body.nid).set({});
@@ -94,6 +91,30 @@ const db = admin.firestore();
         }
     });
 
+    /**
+     * Get users that visited a place at a given dateTime
+     */
+    router.get('/:place_id/users', /*isServiceProvider,*/ async (req, res)=>{
+        try{
+            var data = await db.collection('places')
+                            .doc(req.params.place_id)
+                            .collection('visits')
+                            .doc(req.query.date)
+                            .collection('times')
+                            .doc(req.query.time)
+                            .collection('people')
+                            .get();
+            var response = []
+            data.forEach(doc=>{
+                response.push(doc.id);
+            });
+            res.status(200);
+            res.send(response);
+        }catch(err){
+            res.status(500);
+            res.send({error: err});
+        }
+    });
 /********************************** */
 
 module.exports = router;
