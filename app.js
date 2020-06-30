@@ -32,6 +32,7 @@ var config = require("./config.json");
     app.use('/api/v0/users', usersRoutes);
     app.use('/api/v0/visits', visitsRoutes);
     app.use('/api/v0/places', placesRoutes);
+    app.use('/api/v0/visits', visitsRoutes);
 
 
 
