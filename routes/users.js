@@ -156,7 +156,8 @@ const db = admin.firestore();
         try{
             let snapshot = await db.collection("users").doc(req.params.nid).collection("visits").get();
             if (snapshot.empty) {
-              res.status(200).send([]);
+              res.status(200)
+              res.send([]);
             }
             let result = [];
             snapshot.forEach(async (doc) => {
@@ -166,9 +167,11 @@ const db = admin.firestore();
                     time: doc.id.split("|")[0].split('T')[1]
                 });
             });
-            res.status(200).send(result);
+            res.status(200)
+            res.send(result);
         }catch(err){
-            res.status(500).send({error: err});
+            res.status(500)
+            res.send({error: err});
         }
     });
 
