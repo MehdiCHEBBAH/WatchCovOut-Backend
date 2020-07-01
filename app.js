@@ -35,8 +35,9 @@ var config = require("./config.json");
       });
     
 
+      let port = 3000
 // start the app
-app.listen( 3000, ()=>{
-    console.log('started on port 3000');
+app.listen( process.env.PORT || port, ()=>{
+    console.log(`started on port ${process.env.PORT || port}`);
 });
 
