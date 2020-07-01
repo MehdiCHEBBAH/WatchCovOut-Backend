@@ -71,7 +71,7 @@ const db = admin.firestore();
      */
     router.post('/:nid', /*isUser,*/ async (req, res)=>{
         try{
-            await db.collection('users').doc(req.params.nid).update({isConfirmedCase: req.query.isConfirmedCase});
+            await db.collection('users').doc(req.params.nid).update({isConfirmedCase: req.query.isConfirmedCase === 'true'? true : false});
             res.status(200);
             res.send({message: 'Updated seccessfuly'});
         }catch(err){
@@ -148,6 +148,30 @@ const db = admin.firestore();
             res.send({error: err});
         }
     });
+
+    /**
+     * Get visits of a user
+     */
+    router.get("/:nid/visits", async (req, res) => {
+        try{
+            let snapshot = await db.collection("users").doc(req.params.nid).collection("visits").get();
+            if (snapshot.empty) {
+              res.status(200).send([]);
+            }
+            let result = [];
+            snapshot.forEach(async (doc) => {
+                result.push({
+                    placeID: doc.id.split("|")[1],
+                    date: doc.id.split("|")[0].split('T')[0],
+                    time: doc.id.split("|")[0].split('T')[1]
+                });
+            });
+            res.status(200).send(result);
+        }catch(err){
+            res.status(500).send({error: err});
+        }
+    });
+
 /********************************** */
 const queryObj2rolesObj = (query)=>{
     let roles = {

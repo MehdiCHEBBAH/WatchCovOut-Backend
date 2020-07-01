@@ -24,13 +24,10 @@ var config = require("./config.json");
 
 /*********** GLOBAL VARS ********* */
     const usersRoutes = require('./routes/users');
-
-    const visitsRoutes = require('./routes/visits');
-
     const placesRoutes = require('./routes/places');
+    
 /* *********** routes ************ */
     app.use('/api/v0/users', usersRoutes);
-    app.use('/api/v0/visits', visitsRoutes);
     app.use('/api/v0/places', placesRoutes);
     
     app.get("/", (req, res) => {

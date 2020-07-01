@@ -73,7 +73,7 @@ const db = admin.firestore();
     });
 
     /**
-     * Add a person to place
+     * visit a place
      */
     router.put('/:place_id/users', /*isUser,*/ async (req, res)=>{
         try{
@@ -109,6 +109,44 @@ const db = admin.firestore();
             });
             res.status(200);
             res.send(response);
+        }catch(err){
+            res.status(500);
+            res.send({error: err});
+        }
+    });
+
+    /**
+     * Get a place
+     */
+    router.get('/:place_id', /*isUser,*/ async (req, res)=>{
+        try{
+            var data = await db.collection('places').doc(req.params.place_id).get();
+            var result = data.data();
+            result.id = data.id;
+            res.status(200);
+            res.send(result);
+        }catch(err){
+            res.status(500);
+            res.send({error: err});
+        }
+    });
+
+    /**
+     * Get the best time to visit a place
+     */
+    router.get('/:place_id/best', /*isUser,*/ async (req, res)=>{
+        try{
+            var result = [];
+            var response  = await db.collection("places").doc(req.params.place_id)
+                                    .collection("visits").doc(req.query.date)
+                                    .collection("times").orderBy('numberOfVisitors').get();
+                response.forEach( doc => {
+                    result.push({
+                        time: doc.id,
+                        numberOfVisitors: doc.data().numberOfVisitors
+                    });
+                });
+                res.status(200).send(result);
         }catch(err){
             res.status(500);
             res.send({error: err});
