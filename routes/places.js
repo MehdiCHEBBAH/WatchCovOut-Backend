@@ -146,7 +146,8 @@ const db = admin.firestore();
                         numberOfVisitors: doc.data().numberOfVisitors
                     });
                 });
-                res.status(200).send(result);
+                res.status(200)
+                res.send(result);
         }catch(err){
             res.status(500);
             res.send({error: err});
