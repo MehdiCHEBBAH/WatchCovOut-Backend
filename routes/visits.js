@@ -3,7 +3,7 @@ var config = require("../config.json");
 
 const router = express.Router();
 
-var {admin} = require('../app');
+var { admin } = require("../app");
 
 /************** Global Vars ************/
 const db = admin.firestore();
@@ -13,27 +13,30 @@ const db = admin.firestore();
 // get best visits for a place in a given date
 router.get("/best", async (req, res) => {
   let locationId = req.query.locationId;
+  console.log(locationId);
+
   let date = req.query.date;
+  console.log(date);
   var result = [];
   db.collection("places")
     .doc(locationId)
     .collection("visits")
     .doc(date)
     .collection("times")
-    .orderBy('numberOfVisitors', 'desc')
+    .orderBy("numberOfVisitors", "desc")
     .get()
-    .then( timesSnapshot => {
-        timesSnapshot.forEach( doc => {
-          let time = doc.id;
-          let numberOfVisitors = doc.data().numberOfVisitors;
+    .then(async (timesSnapshot) => {
+      timesSnapshot.forEach((doc) => {
+        let time = doc.id;
+        let numberOfVisitors = doc.data().numberOfVisitors;
 
-          result.push({
-            time,
-            numberOfVisitors
-          });
+        result.push({
+          time,
+          numberOfVisitors,
         });
-    
-        res.status(200).send(result);
+      });
+
+      res.status(200).send(result);
     });
 });
 
@@ -56,10 +59,14 @@ router.get("/user/:userId", async (req, res) => {
     let items = doc.id.split("|");
     let date = items[0];
     let placeId = items[1];
-
     console.log(date);
     console.log(placeId);
     let mydata = {};
+
+  // result.push({
+    //   id: doc.id,
+    //   data: mydata,
+    // });
     let place = await db
       .collection("places")
       .doc(placeId)
@@ -72,9 +79,10 @@ router.get("/user/:userId", async (req, res) => {
           id: doc.id,
           data: mydata,
         });
-        res.status(200).send(result);
+        
       });
   });
+  res.status(200).send(result);
 });
 
 // choose a time and date for visiting
@@ -99,14 +107,21 @@ router.post("/choose/:placeId", async (req, res) => {
       .doc(userId);
     let result1 = await visitRef.set({});
 
-    let userRef = db.collection("users").doc(userId).collection('visits').doc(date+"T"+time+'|'+ placeId);
+    let userRef = db
+      .collection("users")
+      .doc(userId)
+      .collection("visits")
+      .doc(date + "T" + time + "|" + placeId);
     let result2 = await userRef.set({});
     return res
       .status(201)
-      .send({ message: "visit choosen with seccess", result: {result1, result2} });
+      .send({
+        message: "visit choosen with seccess",
+        result: { result1, result2 },
+      });
   } catch (error) {
-    console.log(error)
-    return res.status(500).send({ error: "Internal server Error"+ error });
+    console.log(error);
+    return res.status(500).send({ error: "Internal server Error" + error });
   }
 });
 
