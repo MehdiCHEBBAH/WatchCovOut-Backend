@@ -49,9 +49,7 @@ router.get("/user/:userId", async (req, res) => {
     .get();
   console.log("done");
   if (snapshot.empty) {
-    return res.status(400).send({
-      error: "Bad Request , userId does not exist",
-    });
+    res.status(200).send([]);
   }
   let result = [];
   snapshot.forEach(async (doc) => {
