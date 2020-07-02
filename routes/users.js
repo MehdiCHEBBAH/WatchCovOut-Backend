@@ -57,6 +57,7 @@ const db = admin.firestore();
                 .catch(err=>{});
                 await db.collection('users').doc(req.body.nid).set({
                     isConfirmedCase: false,
+                    valide: false,
                     nationalCardPicURL: req.body.nationalCardPicURL,
                     uid: req.params.uid
                 });
@@ -65,6 +66,22 @@ const db = admin.firestore();
             }
         });
     });
+
+
+         /**
+     * validate or invalidate a user
+     */
+    router.post('/validate/:nid', /*isUser,*/ async (req, res)=>{
+        try{
+            await db.collection('users').doc(req.params.nid).update({valide: req.query.valide === 'true'? true : false});
+            res.status(200);
+            res.send({message: 'Updated seccessfuly'});
+        }catch(err){
+            res.status(500);
+            res.send({error: err});
+        }
+    });
+
 
     /**
      * make the person confirmed case
@@ -79,6 +96,10 @@ const db = admin.firestore();
             res.send({error: err});
         }
     });
+
+
+
+
 
     /**
      * get people meeted a person in specific days
