@@ -155,12 +155,8 @@ const db = admin.firestore();
     router.get("/:nid/visits", async (req, res) => {
         try{
             let snapshot = await db.collection("users").doc(req.params.nid).collection("visits").get();
-            if (snapshot.empty) {
-              res.status(200)
-              res.send([]);
-            }
             let result = [];
-            snapshot.forEach(async (doc) => {
+            snapshot.forEach((doc) => {
                 result.push({
                     placeID: doc.id.split("|")[1],
                     date: doc.id.split("|")[0].split('T')[0],
