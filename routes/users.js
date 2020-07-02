@@ -141,7 +141,7 @@ const db = admin.firestore();
                 count: people[e]
             });
         }
-        res.send(people);
+        res.send(response);
     });
 
     /**
