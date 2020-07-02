@@ -105,7 +105,7 @@ const db = admin.firestore();
                             .get();
             var response = []
             data.forEach(doc=>{
-                response.push(doc.id);
+                response.push({nid: doc.id});
             });
             res.status(200);
             res.send(response);
