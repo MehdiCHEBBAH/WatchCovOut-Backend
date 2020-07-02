@@ -20,7 +20,7 @@ const db = admin.firestore();
             const result = await db.collection('places').add(req.body);
             var i;
             var now = new Date();
-            for(i = 0; i<=30 ; i++){
+            for(i = 0; i<=10 ; i++){
                 await db
                     .collection('places').doc(result.id)
                     .collection('visits').doc(date.format(now, 'YYYY-MM-DD'))
@@ -105,7 +105,7 @@ const db = admin.firestore();
                             .get();
             var response = []
             data.forEach(doc=>{
-                response.push(doc.id);
+                response.push({nid: doc.id});
             });
             res.status(200);
             res.send(response);
