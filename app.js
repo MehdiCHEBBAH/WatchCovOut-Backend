@@ -35,7 +35,7 @@ var config = require("./config.json");
       });
     
 
-      let port = 3000
+      let port = 8081
 // start the app
 app.listen( process.env.PORT || port, ()=>{
     console.log(`started on port ${process.env.PORT || port}`);

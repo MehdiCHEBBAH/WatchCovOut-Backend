@@ -112,6 +112,14 @@ const db = admin.firestore();
                 }
             });
         }
+
+        let response = []
+        for(let e in people){
+            response.push({
+                nid: e,
+                count: people[e]
+            });
+        }
         res.send(people);
     });
 
