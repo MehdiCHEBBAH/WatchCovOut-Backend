@@ -8,7 +8,6 @@ const router = express.Router();
 
 var {admin} = require('../app');
 const { isAdmin, isUser } = require('../auth');
-let port = 8081;
 
 
 /************** Global Vars ************/

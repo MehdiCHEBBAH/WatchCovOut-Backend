@@ -25,10 +25,12 @@ var config = require("./config.json");
 /*********** GLOBAL VARS ********* */
     const usersRoutes = require('./routes/users');
     const placesRoutes = require('./routes/places');
+    const zonesRoutes = require('./routes/zones');
     
 /* *********** routes ************ */
     app.use('/api/v0/users', usersRoutes);
     app.use('/api/v0/places', placesRoutes);
+    app.use('/api/v0/zones', zonesRoutes);
     
     app.get("/", (req, res) => {
         res.status(200).send("/api/v0/");
