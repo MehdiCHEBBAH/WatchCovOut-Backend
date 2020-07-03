@@ -1,5 +1,5 @@
 const express = require('express');
-
+const axios = require('axios');
 
 var config = require("../config.json");
 
@@ -8,7 +8,7 @@ const router = express.Router();
 
 var {admin} = require('../app');
 const { isAdmin, isUser } = require('../auth');
-
+let port = 8081;
 
 
 /************** Global Vars ************/
@@ -20,15 +20,72 @@ const db = admin.firestore();
      * Get all users
      */
     router.get('/', /*isAdmin,*/ async(req, res)=>{
-        var data = await db.collection('users').get()
-        var response = [];
-        data.forEach(doc=>{
-            let e = doc.data();
-            e.nid = doc.id;
-            response.push(e);
-        })
-        res.status(200);
-        res.send(response);
+        if(typeof req.query.confirmed != 'undefined'){
+            var data = await db.collection('users').where('isConfirmedCase','==', true).get()
+            var response = [];
+            data.forEach(doc=>{
+                let e = doc.data();
+                e.nid = doc.id;
+                response.push(e);
+            })
+            res.status(200);
+            res.send(response);
+        }else if(typeof req.query.suspect != 'undefined'){
+            var data = await db.collection('users').where('isConfirmedCase','==', true).get()
+            var ids = [];
+            data.forEach(doc=>{
+                ids.push(doc.id);
+            });
+            var dates = req.query.dates.split(',');
+            var people = {};
+            for(let e of ids){
+                let visits = await db.collection('users').doc(e).collection('visits').get();
+                let results = [];
+                visits.forEach(doc=>{
+                    if(dates.includes(doc.id.split('T')[0])){
+                        results.push(doc.id);
+                    }
+                });
+                for(let e of results){
+                    let place = e.split('|')[1];
+                    let day = e.split('T')[0];
+                    let time = e.split('T')[1].split('|')[0];
+
+                    let data = await db.collection('places')
+                                        .doc(place)
+                                        .collection('visits')
+                                        .doc(day)
+                                        .collection('times')
+                                        .doc(time)
+                                        .collection('people')
+                                        .get();
+                    data.forEach(doc=>{
+                        if(!(doc.id === e)){
+                            people[doc.id] = (typeof people[doc.id] === 'undefined') ? 1 : people[doc.id] + 1;
+                        }
+                    });
+                }
+            }
+            let response = []
+            for(let e in people){
+                response.push({
+                    nid: e,
+                    count: people[e]
+                });
+            }
+            res.status(200);
+            res.send(response);
+        }else{
+            var data = await db.collection('users').get()
+            var response = [];
+            data.forEach(doc=>{
+                let e = doc.data();
+                e.nid = doc.id;
+                response.push(e);
+            })
+            res.status(200);
+            res.send(response);
+        }
     });
 
     /**
